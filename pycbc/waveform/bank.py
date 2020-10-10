@@ -354,7 +354,7 @@ class TemplateBank(object):
         # The fields to use in making a template hash
         hash_fields = ['mass1', 'mass2', 'inclination',
                        'spin1x', 'spin1y', 'spin1z',
-                       'spin2x', 'spin2y', 'spin2z',]
+                       'spin2x', 'spin2y', 'spin2z', 'deltaChi1', 'deltaChi2', 'deltaChi3', 'deltaChi4']
 
         fields = [f for f in hash_fields if f in fields]
         template_hash = np.array([tuple_to_hash(v) for v in zip(*[self.table[p]
