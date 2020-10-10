@@ -1,4 +1,6 @@
-The master branch already had the nonGR params dchi* in the waveform.py and parameter.py. They are also input parameters in the get_td_waveform and get_fd_waveform. 
+The master branch already had the nonGR params dchi* in the waveform.py and parameter.py. They are also input parameters in the get_td_waveform and get_fd_waveform.
+
+Their notaion is dchi*, our notation is deltaChi*
 
 
 ![GW150914](https://raw.githubusercontent.com/gwastro/pycbc-logo/master/pycbc_logo_name.png)
