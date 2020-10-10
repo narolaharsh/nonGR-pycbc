@@ -478,16 +478,16 @@ dchi0 = Parameter("dchi0",
                 dtype=float, default=0., label=r"$d\chi_0$",
                 description="0PN testingGR parameter.")
 deltaChi1 = Parameter("deltaChi1",
-                dtype=float, default=0., label=r"$d\chi_1$",
+                dtype=float, default=None., label=r"$\deltaChi1$",
                 description="0.5PN testingGR parameter.")
 deltaChi2 = Parameter("deltaChi2",
-                dtype=float, default=0., label=r"$d\chi_2$",
+                dtype=float, default=None, label=r"$\deltaChi2$",
                 description="1PN testingGR parameter.")
 deltaChi3 = Parameter("deltaChi3",
-                dtype=float, default=0., label=r"$d\chi_3$",
+                dtype=float, default=None, label=r"$\deltaChi3$",
                 description="1.5PN testingGR parameter.")
 deltaChi4 = Parameter("deltaChi4",
-                dtype=float, default=0., label=r"$d\chi_4$",
+                dtype=float, default=None, label=r"$\deltaChi4$",
                 description="2PN testingGR parameter.")
 dchi5 = Parameter("dchi5",
                 dtype=float, default=0., label=r"$d\chi_5$",
@@ -607,8 +607,8 @@ td_required = ParameterList([f_lower, delta_t, approximant])
 fd_required = ParameterList([f_lower, delta_f, approximant])
 
 ####
-cbc_td_required = ParameterList([mass1, mass2, f_lower, delta_t, approximant])
-cbc_fd_required = ParameterList([mass1, mass2, f_lower, delta_f, approximant])
+cbc_td_required = ParameterList([mass1, mass2, deltaChi1, deltaChi2, deltaChi3, deltaChi4, f_lower, delta_t, approximant])
+cbc_fd_required = ParameterList([mass1, mass2, deltaChi1, deltaChi2, deltaChi3, deltaChi4, f_lower, delta_f, approximant])
 
 # the following are parameters that can be used to generate a
 # frequency series waveform
