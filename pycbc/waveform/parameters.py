@@ -478,7 +478,7 @@ dchi0 = Parameter("dchi0",
                 dtype=float, default=0., label=r"$d\chi_0$",
                 description="0PN testingGR parameter.")
 deltaChi1 = Parameter("deltaChi1",
-                dtype=float, default=None., label=r"$\deltaChi1$",
+                dtype=float, default=None, label=r"$\deltaChi1$",
                 description="0.5PN testingGR parameter.")
 deltaChi2 = Parameter("deltaChi2",
                 dtype=float, default=None, label=r"$\deltaChi2$",
