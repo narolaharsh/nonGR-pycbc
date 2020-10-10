@@ -477,16 +477,16 @@ mode_array = Parameter("mode_array",
 dchi0 = Parameter("dchi0",
                 dtype=float, default=0., label=r"$d\chi_0$",
                 description="0PN testingGR parameter.")
-dchi1 = Parameter("dchi1",
+deltaChi1 = Parameter("deltaChi1",
                 dtype=float, default=0., label=r"$d\chi_1$",
                 description="0.5PN testingGR parameter.")
-dchi2 = Parameter("dchi2",
+deltaChi2 = Parameter("deltaChi2",
                 dtype=float, default=0., label=r"$d\chi_2$",
                 description="1PN testingGR parameter.")
-dchi3 = Parameter("dchi3",
+deltaChi3 = Parameter("deltaChi3",
                 dtype=float, default=0., label=r"$d\chi_3$",
                 description="1.5PN testingGR parameter.")
-dchi4 = Parameter("dchi4",
+deltaChi4 = Parameter("deltaChi4",
                 dtype=float, default=0., label=r"$d\chi_4$",
                 description="2PN testingGR parameter.")
 dchi5 = Parameter("dchi5",
@@ -555,7 +555,7 @@ extrinsic_params = orientation_params + location_params
 
 # testing GR parameters
 testingGR_params = ParameterList\
-    ([dchi0, dchi1, dchi2, dchi3, dchi4, dchi5, dchi5l, dchi6, dchi6l,
+    ([dchi0, deltaChi1, deltaChi2, deltaChi3, deltaChi4, dchi5, dchi5l, dchi6, dchi6l,
       dchi7, dalpha1, dalpha2, dalpha3, dalpha4, dalpha5,
       dbeta1, dbeta2, dbeta3])
 
