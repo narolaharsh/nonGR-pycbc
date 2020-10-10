@@ -242,7 +242,7 @@ class _XMLInjectionSet(object):
             deltaChi3 = inj.alpha4, deltaChi4 = inj.alpha5,
             **self.extra_args)
         
-        print 'non-GR params', inj.alpha1, inj.alpha2, inj.alpha4, inj.alpha5 
+        print('non-GR params', inj.alpha1, inj.alpha2, inj.alpha4, inj.alpha5) 
         
         hp /= distance_scale
         hc /= distance_scale
