@@ -1,3 +1,6 @@
+The master branch already had the nonGR params dchi* in the waveform.py and parameter.py. They are also input parameters in the get_td_waveform and get_fd_waveform. 
+
+
 ![GW150914](https://raw.githubusercontent.com/gwastro/pycbc-logo/master/pycbc_logo_name.png)
 
 Welcome to PyCBC, a python toolkit for gravitational-wave astronomy and data analysis with the goal of detecting and studying gravitational waves from compact binary coalescences (CBCs) and other sources.
