@@ -283,14 +283,23 @@ class TemplateBank(object):
             self.indoc = None
             f = h5py.File(filename, 'r')
             self.filehandler = f
-            try:
+            #############################################################
+            #############################################################
+            '''try:
                 fileparams = list(f.attrs['parameters'])
             except KeyError:
                 # just assume all of the top-level groups are the parameters
                 fileparams = list(f.keys())
                 logging.info("WARNING: no parameters attribute found. "
                     "Assuming that %s " %(', '.join(fileparams)) +
+                    "are the parameters.")'''
+            #################################################################
+            #################################################################
+            fileparams = list(f.keys())
+            logging.info("WARNING: no parameters attribute found. "
+                    "Assuming that %s " %(', '.join(fileparams)) +
                     "are the parameters.")
+            
             tmp_params = []
             # At this point fileparams might be bytes. Fix if it is
             for param in fileparams:
