@@ -219,6 +219,7 @@ for trigger_file, injection_file in zip(args.trigger_files,
     logging.info('Saving injection information')
     columns = ['mass1', 'mass2', 'spin1x', 'spin1y',
                'spin1z', 'spin2x', 'spin2y', 'spin2z', 
+               'spin1z', 'spin2x', 'spin2y', 'spin2z',
                'deltaChi1', 'deltaChi2', 'deltaChi3', 'deltaChi4',
                'eff_dist_l', 'eff_dist_h', 'eff_dist_v',
                'inclination', 'polarization', 'coa_phase',
