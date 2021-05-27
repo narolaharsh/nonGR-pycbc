@@ -236,10 +236,14 @@ class _XMLInjectionSet(object):
         # compute the waveform time series
         hp, hc = get_td_waveform(
             inj, approximant=name, delta_t=delta_t,
-            phase_order=phase_order,
+            phase_order=phase_order, 
             f_lower=f_l, distance=inj.distance,
+            deltaChi1 = inj.alpha1, deltaChi2 = inj.alpha2, \
+            deltaChi3 = inj.alpha4, deltaChi4 = inj.alpha5,
             **self.extra_args)
-
+        
+        print('non-GR params', inj.alpha1, inj.alpha2, inj.alpha4, inj.alpha5) 
+        
         hp /= distance_scale
         hc /= distance_scale
 

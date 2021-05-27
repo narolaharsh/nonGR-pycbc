@@ -137,14 +137,14 @@ def _check_lal_pars(p):
     #TestingGR parameters:
     if p['dchi0'] is not None:
         lalsimulation.SimInspiralWaveformParamsInsertNonGRDChi0(lal_pars,p['dchi0'])
-    if p['dchi1'] is not None:
-        lalsimulation.SimInspiralWaveformParamsInsertNonGRDChi1(lal_pars,p['dchi1'])
-    if p['dchi2'] is not None:
-        lalsimulation.SimInspiralWaveformParamsInsertNonGRDChi2(lal_pars,p['dchi2'])
-    if p['dchi3'] is not None:
-        lalsimulation.SimInspiralWaveformParamsInsertNonGRDChi3(lal_pars,p['dchi3'])
-    if p['dchi4'] is not None:
-        lalsimulation.SimInspiralWaveformParamsInsertNonGRDChi4(lal_pars,p['dchi4'])
+    if p['deltaChi1'] is not None:
+        lalsimulation.SimInspiralWaveformParamsInsertNonGRDChi1(lal_pars,p['deltaChi1'])
+    if p['deltaChi2'] is not None:
+        lalsimulation.SimInspiralWaveformParamsInsertNonGRDChi2(lal_pars,p['deltaChi2'])
+    if p['deltaChi3'] is not None:
+        lalsimulation.SimInspiralWaveformParamsInsertNonGRDChi3(lal_pars,p['deltaChi3'])
+    if p['deltaChi4'] is not None:
+        lalsimulation.SimInspiralWaveformParamsInsertNonGRDChi4(lal_pars,p['deltaChi4'])
     if p['dchi5'] is not None:
         lalsimulation.SimInspiralWaveformParamsInsertNonGRDChi5(lal_pars,p['dchi5'])
     if p['dchi5l'] is not None:
