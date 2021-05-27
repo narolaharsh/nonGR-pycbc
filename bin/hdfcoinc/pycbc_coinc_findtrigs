@@ -135,6 +135,7 @@ class ReadByTemplate(object):
             if 'parameters' in self.bank.attrs :
                 for col in self.bank.attrs['parameters']:
                     self.param[col] = self.bank[col][self.template_num]
+                    print col, self.param[col]
             else :
                 for col in self.bank:
                     self.param[col] = self.bank[col][self.template_num]

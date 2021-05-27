@@ -42,6 +42,7 @@ def keep_ind(times, start, end):
     return time_sorting[indices]
 
 non_gr_convert_dic = {'deltaChi1': 'alpha1', 'deltaChi2': 'alpha2', 'deltaChi3': 'alpha4', 'deltaChi4': 'alpha5'}
+
 def xml_to_hdf(table, hdf_file, hdf_key, columns):
     """ Save xml columns as hdf columns, only float32 supported atm.
     """
@@ -74,6 +75,8 @@ parser.add_argument('--redshift-column', default=None,
 parser.add_argument('--verbose', action='count')
 parser.add_argument('--output-file', required=True)
 args = parser.parse_args()
+
+print 'script 0604'
 
 if args.verbose:
     log_level = logging.INFO
@@ -215,6 +218,7 @@ for trigger_file, injection_file in zip(args.trigger_files,
     found_fore_v = numpy.arange(0, len(stat), 1)[left[found_after_vetoes]]
     logging.info('Saving injection information')
     columns = ['mass1', 'mass2', 'spin1x', 'spin1y',
+               'spin1z', 'spin2x', 'spin2y', 'spin2z', 
                'spin1z', 'spin2x', 'spin2y', 'spin2z',
                'deltaChi1', 'deltaChi2', 'deltaChi3', 'deltaChi4',
                'eff_dist_l', 'eff_dist_h', 'eff_dist_v',

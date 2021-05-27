@@ -1,0 +1,244 @@
+#!/usr/bin/env python
+
+import argparse, h5py, numpy, logging, matplotlib, sys
+from matplotlib.pyplot import cm
+import pylab, pycbc.pnutils, pycbc.results, pycbc, pycbc.version
+from pycbc import sensitivity
+from lal import YRJUL_SI as lal_YRJUL_SI
+import numpy as np
+from nongr_chirptime.compute_chirp_length import compute_chirp_time
+from glue.ligolw import utils as ligolw_utils
+from glue.ligolw.ligolw import LIGOLWContentHandler
+from glue.ligolw import table, lsctables
+class mycontenthandler(LIGOLWContentHandler):
+    pass
+lsctables.use_in(mycontenthandler)
+import lalsimulation as lalsim
+
+msun = 1.989*1e30
+
+parser = argparse.ArgumentParser(description = 'script to calcualte VT in chirp time bins')
+
+parser.add_argument('--found-missed-file', help = '"ALLINJ" injection   file from the output/allinj folder', required = True)
+
+parser.add_argument('--injection-file', help = 'The one generated with lalapps_inspinj', required = True)
+
+parser.add_argument('--tchirp-values', help = 'Provide if chirp time is already calculated. Optional. If not give, the script will calculate chirp time')
+
+
+parser.add_argument('--output-file-name', help = 'Name of the output file', required = True)
+
+parser.add_argument('--dist-bins', type=int, default=50,
+                    help="Number of distance bins for 'pylal' volume "
+                         "estimation. Default 50")
+parser.add_argument('--integration-method', default='pylal',
+                    choices=['pylal', 'shell', 'mc', 'vchirp_mc'],
+                    help="Sensitive volume estimation method. Default 'pylal'")
+
+parser.add_argument('--sig-type', choices=['ifar', 'fap', 'stat'],
+                    default='ifar',
+                    help="x-axis significance measure. Default 'ifar'")
+parser.add_argument('--f-lower', default = 30., help = 'Lower limit for frequency. Default 30.', type = float)
+
+parser.add_argument('--dist-type', choices=['distance', 'volume', 'vt'],
+                    default='vt',
+                    help="y-axis sensitivity measure. Default 'distance'")
+
+parser.add_argument('--verbose', action = 'count')
+
+
+args = parser.parse_args()
+
+indoc = ligolw_utils.load_filename(args.injection_file, False, contenthandler=mycontenthandler)
+signal_table = table.get_table(indoc, lsctables.SimInspiralTable.tableName)
+deltaChi1 = signal_table.get_column('alpha1')
+deltaChi2 = signal_table.get_column('alpha2')
+deltaChi3 = signal_table.get_column('alpha4')
+deltaChi4 = signal_table.get_column('alpha5')
+
+
+
+
+bins = [0.34, 2.00, 3.50, 4.90] #tchirp bins
+
+
+
+
+# initialize injection arrays and duration
+# mchirp is required for Monte-Carlo method for dchirp distributed inj
+missed = {
+    'dist'  : numpy.array([]),
+    'param' : numpy.array([]),
+    'mchirp': numpy.array([]),
+}
+found = {
+    'dist'  : numpy.array([]),
+    'param' : numpy.array([]),
+    'mchirp': numpy.array([]),
+    'sig'   : numpy.array([]),
+    'sig_exc' : numpy.array([]),
+}
+t = 0.
+
+with h5py.File(args.found_missed_file, 'r') as f:
+
+    # Get the found (at any FAR)/missed injection indices
+    foundi = f['found_after_vetoes/injection_index'][:]
+    missedi = f['missed/after_vetoes'][:]
+
+    # retrieve injection parameters
+    dist = f['injections/distance'][:]
+    m1, m2 = f['injections/mass1'][:], f['injections/mass2'][:]
+    s1x, s2x = f['injections/spin1x'][:], f['injections/spin2x'][:]
+    s1z, s2z = f['injections/spin1z'][:], f['injections/spin2z'][:]
+    # y-components not used but read them in for symmetry
+    s1y, s2y = f['injections/spin1y'][:], f['injections/spin2y'][:]
+    inc = f['injections/inclination'][:]
+    
+    mchirp = pycbc.pnutils.mass1_mass2_to_mchirp_eta(m1, m2)[0]
+
+    
+    if args.tchirp_values is not None:
+        print 'Not calculating chirp time, reading from the file provided'
+        tchirp = np.load(args.tchirp_values)
+        pvals = tchirp
+        
+    else:
+        print 'calculating chirp time'
+        t_chirp = np.zeros(len(m1))
+        for i in range(len(m1)):
+            deltaChi = {'DChi1':float(deltaChi1[i]), 'DChi2':float(deltaChi2[i]), 'DChi3':float(deltaChi3[i]), \
+                        'DChi4':float(deltaChi4[i])}
+            t_chirp[i] = compute_chirp_time(flow = 30., mass1 = float(m1[i]), mass2 = float(m2[i]), spin1z = float(s1z[i]), \
+                                            spin2z = float(s2z[i]), nonGRParams = deltaChi)
+
+        pvals = t_chirp
+        print 'Saving chirp times array'
+        np.save('t_chirp.npy', t_chirp)
+
+    if args.sig_type == 'ifar':
+        sig_exc = f['found_after_vetoes/ifar_exc'][:]
+        try:
+            sig = f['found_after_vetoes/ifar'][:]
+        except KeyError:  # multiifo inj files may not have inclusive FAR
+            sig = numpy.array([])
+    
+    missed['dist']  = numpy.append(missed['dist'], dist[missedi])
+    missed['param'] = numpy.append(missed['param'], pvals[missedi])
+    missed['mchirp']= numpy.append(missed['mchirp'], mchirp[missedi])
+    found['dist']   = numpy.append(found['dist'], dist[foundi])
+    found['param']  = numpy.append(found['param'], pvals[foundi])
+    found['mchirp'] = numpy.append(found['mchirp'], mchirp[foundi])
+    found['sig']    = numpy.append(found['sig'], sig)
+    found['sig_exc']= numpy.append(found['sig_exc'], sig_exc)
+
+    # Time in years
+    if args.dist_type == 'vt':
+        t += f.attrs['foreground_time_exc'] / lal_YRJUL_SI
+
+    
+# Parameter bin legend labels
+labels = {
+    'mchirp'     : "$ M_{\\rm chirp} \in [%5.2f, %5.2f] M_\odot $",
+    'eta'        : "$ \\eta \in [%5.3f, %5.3f] $",
+    'total_mass' : "$ M_{\\rm total} \in [%5.2f, %5.2f] M_\odot $",
+    'max_mass'   : "$ {\\rm max}(m_1, m_2) \in [%5.2f, %5.2f] M_\odot $",
+    'spin'       : "$ \\chi_{\\rm eff} \in [%5.2f, %5.2f] $",
+    'template_duration' : "$ \\tau \in [%5.2f, %5.2f] s $",
+    'mratio' : "$ Mass Ratio \in [%5.3f, %5.3f] $",
+    'chirp_time' : "Chirp Time [%5.1f, %5.1f]"
+}
+
+
+ylabel = xlabel = ""
+
+xlabel = 'Inverse False Alarm Rate (years)'
+
+x_values = 10. ** (numpy.arange(0, 4, .05))
+
+plotdict = {}
+plotdict['xvals'] = x_values
+
+# Switches for plotting inclusive/exclusive significance
+color = iter(cm.rainbow(numpy.linspace(0, 1, len(bins)-1)))
+
+fvalues = [found['sig'], found['sig_exc']]
+do_labels = [True, False]
+alphas = [.8, .3]
+# Cycle over parameter bins plotting each in turn
+
+for j in range(len(bins)-1):
+    c = next(color)
+
+    # cycle over inclusive / exclusive significance if available
+    for sig_val, do_label, alpha in zip(fvalues, do_labels, alphas):
+        if sig_val[0] is None:
+            logging.info('Skipping exclusive significance')
+            continue
+
+        left  = float(bins[j])
+        right = float(bins[j+1])
+        logging.info('Injections between param values %5.2f and %5.2f' %
+                     (left, right))
+
+        # Get distance of missed injections within parameter bin
+        binm = numpy.logical_and(missed['param'] >= left,
+                                 missed['param'] < right)
+        m_dist = missed['dist'][binm]
+
+        # Abort if the bin has too few triggers
+        if len(m_dist) < 2:
+            continue
+
+        vols, vol_errors = [], []
+
+        # Slice up found injections in parameter bin
+        binf = numpy.logical_and(found['param'] >= left,
+                                 found['param'] < right)
+        binfsig  = sig_val[binf]
+
+        # Calculate each sensitive distance at a given significance threshold
+        for x_val in x_values:
+            #logging.info('Thresholding on significance at %5.2f' % x_val)
+            # Count found inj towards sensitivity if IFAR/stat exceeds threshold
+            # or if FAP value is less than threshold
+            if args.sig_type == 'ifar' or args.sig_type == 'stat':
+                loud = binfsig >= x_val
+                quiet = binfsig < x_val
+
+            # Distances of inj found above threshold
+            f_dist = found['dist'][binf][loud]
+            # Distances of inj found below threshold
+            fm_dist = found['dist'][binf][quiet]
+
+            # Add distances of 'quiet' found injections to the missed list
+            m_dist_full = numpy.append(m_dist, fm_dist)
+
+            # Choose the volume estimation method
+            if args.integration_method == 'pylal':
+                vol, vol_err = sensitivity.volume_binned_pylal(f_dist,
+                                             m_dist_full, bins=args.dist_bins)
+            
+            vols.append(vol)
+            vol_errors.append(vol_err)
+
+        vols = numpy.array(vols)
+        vol_errors = numpy.array(vol_errors)
+
+        if args.dist_type == 'vt':
+            ylabel = "Volume $\\times$ Time (yr Mpc$^3$)"
+
+            reach, ehigh, elow = vols * t, vol_errors * t, vol_errors * t
+
+        label = labels['chirp_time'] % (left, right) if do_label else None
+        
+                
+        plotdict['data/%s' % label] = reach
+        plotdict['errorhigh/%s' % label] = ehigh
+        plotdict['errorlow/%s' % label] = elow
+
+outfile = h5py.File(args.output_file_name,'w')
+for key in plotdict.keys():
+    outfile.create_dataset(key, data=plotdict[key])
+
+outfile.close()
